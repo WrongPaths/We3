@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleStorage // Terminal Interface</title>
+    <!-- 使用国内 CDN 加速 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 使用系统字体，避免加载 Google Fonts -->
+    <style>
+        @font-face {
+            font-family: 'Orbitron';
+            src: local('Arial');
+        }
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: local('Consolas'), local('Monaco'), local('Courier New');
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-bg': '#0a0a0f',
+                        'cyber-dark': '#0F0F23',
+                        'cyber-green': '#00FF88',
+                        'cyber-green-dim': '#00FF8866',
+                        'cyber-blue': '#00D4FF',
+                        'cyber-red': '#FF0055',
+                        'cyber-yellow': '#FFFF00',
+                        'cyber-muted': '#1a1a2e',
+                        'cyber-border': '#16213e',
+                    },
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'monospace'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Cyberpunk Grid Background */
+        .cyber-grid {
+            background-image:
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Scanline Effect */
+        .scanlines::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Neon Glow */
+        .neon-text {
+            text-shadow:
+                0 0 5px currentColor,
+                0 0 10px currentColor,
+                0 0 20px currentColor;
+        }
+
+        .neon-box {
+            box-shadow:
+                0 0 5px rgba(0, 255, 136, 0.5),
+                0 0 10px rgba(0, 255, 136, 0.3),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        /* Blinking Cursor */
+        .cursor-blink::after {
+            content: '_';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Data Stream Animation */
+        .data-stream {
+            animation: dataFlow 2s linear infinite;
+        }
+
+        @keyframes dataFlow {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* Pulse Ring */
+        .pulse-ring {
+            animation: pulseRing 2s ease-out infinite;
+            will-change: transform, opacity;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+                border-color: rgba(0, 255, 136, 1);
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+                border-color: rgba(0, 255, 136, 0);
+            }
+        }
+
+        /* Glitch Effect */
+        .glitch:hover {
+            animation: glitch 0.3s linear;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Terminal Input Style */
+        .terminal-input {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            caret-color: #00FF88;
+        }
+
+        .terminal-input:focus {
+            outline: none;
+            border-color: #00FF88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Status Indicator */
+        .status-connected {
+            animation: statusPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Hexagon Shape */
+        .hex-border {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        /* Noise Overlay - simplified for performance */
+        .noise-overlay {
+            position: relative;
+        }
+        .noise-overlay::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 99;
+            will-change: auto;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00FF88;
+            border-radius: 0;
+        }
+
+        /* Transaction Log Entry */
+        .log-entry {
+            border-left: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .log-entry:hover {
+            border-left-color: #00FF88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-cyber-bg cyber-grid min-h-screen font-mono text-gray-300 noise-overlay scanlines relative overflow-x-hidden">
+
+    <!-- Header / Status Bar -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-cyber-dark/80 backdrop-blur border-b border-cyber-green/20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 border-2 border-cyber-green flex items-center justify-center">
+                    <span class="text-cyber-green font-orbitron text-xs">SS</span>
+                </div>
+                <span class="font-orbitron text-cyber-green text-sm tracking-widest">SIMPLESTORAGE</span>
+                <span class="text-cyber-green/50 text-xs">// v1.0.0</span>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="flex items-center gap-4">
+                <div id="networkStatus" class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-cyber-red"></div>
+                    <span class="text-xs text-cyber-red">DISCONNECTED</span>
+                </div>
+                <button id="demoBtn" class="px-4 py-2 border border-cyber-yellow text-cyber-yellow font-orbitron text-xs tracking-wider hover:bg-cyber-yellow hover:text-cyber-bg transition-all duration-300 glitch cursor-pointer">
+                    [DEMO MODE]
+                </button>
+                <button id="connectBtn" class="px-4 py-2 border border-cyber-green text-cyber-green font-orbitron text-xs tracking-wider hover:bg-cyber-green hover:text-cyber-bg transition-all duration-300 glitch cursor-pointer">
+                    [METAMASK]
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-10 px-4 max-w-7xl mx-auto">
+
+        <!-- Hero Terminal Section -->
+        <section class="mt-8 mb-12">
+            <div class="border border-cyber-border bg-cyber-dark/50 p-6 neon-box">
+                <!-- Terminal Header -->
+                <div class="flex items-center gap-2 mb-4 border-b border-cyber-border pb-3">
+                    <div class="w-3 h-3 rounded-full bg-cyber-red"></div>
+                    <div class="w-3 h-3 rounded-full bg-cyber-yellow"></div>
+                    <div class="w-3 h-3 rounded-full bg-cyber-green"></div>
+                    <span class="ml-4 text-xs text-gray-500">terminal://simplestorage.interface</span>
+                </div>
+
+                <!-- Terminal Content -->
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-start gap-2">
+                        <span class="text-cyber-green">$</span>
+                        <span class="text-gray-400">system.status()</span>
+                        <span class="ml-2 text-cyber-blue cursor-blink">INITIALIZING</span>
+                    </div>
+                    <div class="flex items-start gap-2 pl-4">
+                        <span class="text-gray-500">|</span>
+                        <span>Blockchain Interface Ready</span>
+                    </div>
+                    <div class="flex items-start gap-2 pl-4">
+                        <span class="text-gray-500">|</span>
+                        <span>Contract: <span id="contractAddress" class="text-cyber-blue">0x?...</span></span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="text-cyber-green">$</span>
+                        <span class="text-gray-400">await interaction...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Interface Grid -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Panel: Storage Value -->
+            <div class="lg:col-span-2">
+                <div class="border border-cyber-border bg-cyber-dark/50 h-full">
+                    <!-- Panel Header -->
+                    <div class="border-b border-cyber-border px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-4 h-4 text-cyber-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                            </svg>
+                            <span class="font-orbitron text-xs tracking-wider">STORAGE MODULE</span>
+                        </div>
+                        <span class="text-xs text-gray-500">memory://slot.0</span>
+                    </div>
+
+                    <!-- Current Value Display -->
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <div class="text-xs text-gray-500 mb-2">// CURRENT VALUE</div>
+                            <div class="relative">
+                                <div class="absolute inset-0 border-2 border-cyber-green/30 pulse-ring rounded-lg"></div>
+                                <div id="currentValue" class="border-2 border-cyber-green bg-cyber-bg p-6 rounded-lg">
+                                    <div class="font-orbitron text-4xl text-cyber-green neon-text text-center">
+                                        0
+                                    </div>
+                                    <div class="text-center text-xs text-gray-500 mt-2">
+                                        uint256 storedData
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Set Value Input -->
+                        <div class="mb-6">
+                            <div class="text-xs text-gray-500 mb-2">// INPUT NEW VALUE</div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-cyber-green">$</span>
+                                <span class="text-gray-400">set(</span>
+                                <input type="number" id="setValueInput" class="terminal-input px-3 py-2 w-full text-cyber-green font-mono" placeholder="enter uint256 value...">
+                                <span class="text-gray-400">)</span>
+                            </div>
+                            <button id="setBtn" class="w-full py-3 border border-cyber-green bg-cyber-green/10 text-cyber-green font-orbitron text-sm tracking-wider hover:bg-cyber-green hover:text-cyber-bg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed glitch cursor-pointer" disabled>
+                                [EXECUTE SET]
+                            </button>
+                        </div>
+
+                        <!-- Get Value Button -->
+                        <div>
+                            <div class="text-xs text-gray-500 mb-2">// REFRESH VALUE</div>
+                            <button id="getBtn" class="w-full py-3 border border-cyber-blue bg-cyber-blue/10 text-cyber-blue font-orbitron text-sm tracking-wider hover:bg-cyber-blue hover:text-cyber-bg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed glitch cursor-pointer" disabled>
+                                [EXECUTE GET]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Transaction Log -->
+            <div>
+                <div class="border border-cyber-border bg-cyber-dark/50 h-full">
+                    <!-- Panel Header -->
+                    <div class="border-b border-cyber-border px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-4 h-4 text-cyber-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <span class="font-orbitron text-xs tracking-wider">TX LOG</span>
+                        </div>
+                        <span class="text-xs text-cyber-yellow" id="txCount">0 entries</span>
+                    </div>
+
+                    <!-- Log Entries -->
+                    <div id="txLog" class="p-4 space-y-3 overflow-y-auto" style="max-height: 400px; contain: layout style paint;">
+                        <div class="text-center text-gray-500 text-xs py-8">
+                            <div class="mb-2">[NO TRANSACTIONS]</div>
+                            <div>Connect wallet to begin</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Stats Section -->
+        <section class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4" style="content-visibility: auto; contain-intrinsic-size: 100px;">
+            <!-- Block Number -->
+            <div class="border border-cyber-border bg-cyber-dark/50 p-4">
+                <div class="text-xs text-gray-500 mb-1">// BLOCK</div>
+                <div id="blockNumber" class="font-orbitron text-lg text-cyber-blue">-</div>
+            </div>
+            <!-- Gas Price -->
+            <div class="border border-cyber-border bg-cyber-dark/50 p-4">
+                <div class="text-xs text-gray-500 mb-1">// GAS PRICE</div>
+                <div id="gasPrice" class="font-orbitron text-lg text-cyber-yellow">-</div>
+            </div>
+            <!-- Account Balance -->
+            <div class="border border-cyber-border bg-cyber-dark/50 p-4">
+                <div class="text-xs text-gray-500 mb-1">// BALANCE</div>
+                <div id="accountBalance" class="font-orbitron text-lg text-cyber-green">-</div>
+            </div>
+            <!-- Network -->
+            <div class="border border-cyber-border bg-cyber-dark/50 p-4">
+                <div class="text-xs text-gray-500 mb-1">// NETWORK</div>
+                <div id="networkName" class="font-orbitron text-lg text-gray-400">-</div>
+            </div>
+        </section>
+
+        <!-- Footer Terminal -->
+        <footer class="mt-8 border border-cyber-border bg-cyber-dark/50 p-4">
+            <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-500">system:</span>
+                    <span id="systemStatus" class="text-cyber-green">ONLINE</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-500">uptime:</span>
+                    <span id="uptime" class="text-cyber-blue">00:00:00</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-500">session:</span>
+                    <span id="sessionId" class="text-gray-400">---</span>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 z-50 hidden">
+        <div class="border border-cyber-green bg-cyber-dark px-4 py-3 flex items-center gap-3 neon-box">
+            <div id="toastIcon" class="w-2 h-2 rounded-full bg-cyber-green"></div>
+            <span id="toastMessage" class="text-sm text-cyber-green font-mono"></span>
+        </div>
+    </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+    <script>
+        // ============================================
+        // SimpleStorage DApp - Web3 Integration
+        // ============================================
+
+        // Configuration
+        const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Default Hardhat deployment
+        const CONTRACT_ABI = [
+            {
+                "inputs": [],
+                "name": "get",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "x", "type": "uint256"}],
+                "name": "set",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [{"indexed": false, "internalType": "uint256", "name": "newValue", "type": "uint256"}],
+                "name": "DataChanged",
+                "type": "event"
+            }
+        ];
+
+        // State
+        let provider = null;
+        let signer = null;
+        let contract = null;
+        let userAddress = null;
+        let txLogs = [];
+        let startTime = Date.now();
+
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const demoBtn = document.getElementById('demoBtn');
+        const setBtn = document.getElementById('setBtn');
+        const getBtn = document.getElementById('getBtn');
+        const setValueInput = document.getElementById('setValueInput');
+        const currentValueEl = document.getElementById('currentValue');
+        const networkStatus = document.getElementById('networkStatus');
+        const contractAddressEl = document.getElementById('contractAddress');
+        const txLogEl = document.getElementById('txLog');
+        const txCountEl = document.getElementById('txCount');
+        const blockNumberEl = document.getElementById('blockNumber');
+        const gasPriceEl = document.getElementById('gasPrice');
+        const accountBalanceEl = document.getElementById('accountBalance');
+        const networkNameEl = document.getElementById('networkName');
+        const uptimeEl = document.getElementById('uptime');
+        const sessionIdEl = document.getElementById('sessionId');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // Generate Session ID
+        sessionIdEl.textContent = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        // Uptime Counter - update every 10s to reduce DOM thrashing
+        function updateUptime() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            uptimeEl.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        updateUptime();
+        setInterval(updateUptime, 10000);
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toastIcon.className = `w-2 h-2 rounded-full ${type === 'success' ? 'bg-cyber-green' : 'bg-cyber-red'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // Add Transaction Log
+        function addTxLog(type, data, hash = null) {
+            const entry = {
+                time: new Date().toLocaleTimeString(),
+                type,
+                data,
+                hash
+            };
+            txLogs.unshift(entry);
+
+            const html = `
+                <div class="log-entry py-2 pl-3 text-xs">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-gray-500">[${entry.time}]</span>
+                        <span class="${type === 'SET' ? 'text-cyber-green' : type === 'DEMO' ? 'text-cyber-yellow' : 'text-cyber-blue'}">${type}</span>
+                    </div>
+                    <div class="text-gray-400 pl-4">data: ${data}</div>
+                    ${hash ? `<div class="text-cyber-green/50 pl-4 truncate">tx: ${hash.substring(0, 20)}...</div>` : ''}
+                </div>
+            `;
+
+            if (txLogs.length === 1) {
+                txLogEl.innerHTML = html;
+            } else {
+                txLogEl.insertAdjacentHTML('afterbegin', html);
+            }
+
+            txCountEl.textContent = `${txLogs.length} entries`;
+            
+            // 自动滚动到顶部（最新日志）
+            txLogEl.scrollTop = 0;
+        }
+
+        // Update UI after connection
+        function updateConnectionUI(address, networkName) {
+            networkStatus.innerHTML = `
+                <div class="w-2 h-2 rounded-full bg-cyber-green status-connected"></div>
+                <span class="text-xs text-cyber-green">${networkName}</span>
+            `;
+            networkNameEl.textContent = networkName;
+            contractAddressEl.textContent = CONTRACT_ADDRESS.substring(0, 10) + '...';
+            userAddress = address;
+
+            // Enable buttons
+            setBtn.disabled = false;
+            getBtn.disabled = false;
+        }
+
+        // Demo Mode - Connect without MetaMask
+        async function connectDemo() {
+            try {
+                demoBtn.textContent = '[LOADING...]';
+                demoBtn.disabled = true;
+                connectBtn.disabled = true;
+
+                // Hardhat default test account private key (account #0)
+                // This account has 10000 ETH on local hardhat node
+                const DEMO_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+                // Connect to local Hardhat node
+                provider = new ethers.JsonRpcProvider('http://localhost:8545');
+                signer = new ethers.Wallet(DEMO_PRIVATE_KEY, provider);
+
+                const address = await signer.getAddress();
+                const network = await provider.getNetwork();
+
+                // Update UI
+                updateConnectionUI(address, 'HARDHAT-DEMO');
+                demoBtn.textContent = `[DEMO: ${address.substring(0, 6)}...]`;
+                connectBtn.textContent = '[METAMASK]';
+
+                // Initialize contract
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                // Fetch initial data
+                await refreshStats();
+                await getValue();
+
+                addTxLog('DEMO', `Demo Mode Active | Account: ${address.substring(0, 10)}...`);
+                showToast('Demo mode connected! (10000 ETH available)');
+
+            } catch (err) {
+                console.error(err);
+                showToast('Demo connection failed: ' + err.message, 'error');
+                demoBtn.textContent = '[DEMO MODE]';
+                demoBtn.disabled = false;
+                connectBtn.disabled = false;
+            }
+        }
+
+        // Connect Wallet with MetaMask
+        async function connectWallet() {
+            if (!window.ethereum) {
+                showToast('MetaMask not detected! Use Demo Mode instead.', 'error');
+                return;
+            }
+
+            try {
+                connectBtn.textContent = '[CONNECTING...]';
+                connectBtn.disabled = true;
+                demoBtn.disabled = true;
+
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send('eth_requestAccounts', []);
+                signer = await provider.getSigner();
+                const address = accounts[0];
+
+                // Get network info
+                const network = await provider.getNetwork();
+                const networkNameMap = {
+                    1: 'MAINNET',
+                    5: 'GOERLI',
+                    11155111: 'SEPOLIA',
+                    31337: 'HARDHAT',
+                    1337: 'LOCAL'
+                };
+                const networkName = networkNameMap[Number(network.chainId)] || `CHAIN ${network.chainId}`;
+
+                // Update UI
+                updateConnectionUI(address, networkName);
+                connectBtn.textContent = `[${address.substring(0, 6)}...${address.substring(38)}]`;
+                demoBtn.textContent = '[DEMO MODE]';
+
+                // Initialize contract
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                // Fetch initial data
+                await refreshStats();
+                await getValue();
+
+                addTxLog('CONNECT', `MetaMask | Account: ${address.substring(0, 10)}...`);
+                showToast('Wallet connected!');
+
+            } catch (err) {
+                console.error(err);
+                showToast('Connection failed: ' + err.message, 'error');
+                connectBtn.textContent = '[METAMASK]';
+                connectBtn.disabled = false;
+                demoBtn.disabled = false;
+            }
+        }
+
+        // Refresh Network Stats
+        async function refreshStats() {
+            if (!provider) return;
+
+            try {
+                const blockNumber = await provider.getBlockNumber();
+                const gasPrice = await provider.getFeeData();
+                const balance = await provider.getBalance(userAddress);
+
+                blockNumberEl.textContent = blockNumber;
+                gasPriceEl.textContent = ethers.formatUnits(gasPrice.gasPrice, 'gwei').substring(0, 6) + ' GWEI';
+                accountBalanceEl.textContent = parseFloat(ethers.formatEther(balance)).toFixed(4) + ' ETH';
+            } catch (err) {
+                console.error('Stats refresh error:', err);
+            }
+        }
+
+        // Get Value from Contract
+        async function getValue() {
+            if (!contract) return;
+
+            try {
+                getBtn.textContent = '[READING...]';
+                const value = await contract.get();
+                currentValueEl.querySelector('.font-orbitron').textContent = value.toString();
+                addTxLog('GET', `Value: ${value.toString()}`);
+                getBtn.textContent = '[EXECUTE GET]';
+            } catch (err) {
+                console.error(err);
+                showToast('Read failed: ' + err.message, 'error');
+                getBtn.textContent = '[EXECUTE GET]';
+            }
+        }
+
+        // Set Value to Contract
+        async function setValue() {
+            if (!contract) return;
+
+            const value = setValueInput.value;
+            if (!value || isNaN(value)) {
+                showToast('Enter a valid number!', 'error');
+                return;
+            }
+
+            try {
+                setBtn.textContent = '[SENDING TX...]';
+                setBtn.disabled = true;
+
+                const tx = await contract.set(BigInt(value));
+                addTxLog('SET', `Value: ${value}`, tx.hash);
+
+                setBtn.textContent = '[WAITING CONFIRM...]';
+
+                // Listen for DataChanged event
+                contract.on('DataChanged', (newValue) => {
+                    currentValueEl.querySelector('.font-orbitron').textContent = newValue.toString();
+                });
+
+                await tx.wait();
+                setBtn.textContent = '[EXECUTE SET]';
+                setBtn.disabled = false;
+
+                showToast(`Value set to ${value}!`);
+                await refreshStats();
+
+            } catch (err) {
+                console.error(err);
+                showToast('Transaction failed: ' + err.message, 'error');
+                setBtn.textContent = '[EXECUTE SET]';
+                setBtn.disabled = false;
+            }
+        }
+
+        // Event Listeners
+        connectBtn.addEventListener('click', connectWallet);
+        demoBtn.addEventListener('click', connectDemo);
+        setBtn.addEventListener('click', setValue);
+        getBtn.addEventListener('click', getValue);
+
+        // Auto-refresh stats every 5 seconds
+        setInterval(refreshStats, 5000);
+
+        // Keyboard shortcut: Enter to submit
+        setValueInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !setBtn.disabled) {
+                setValue();
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+{
+    // VSCode 调试配置文件版本
+    "version": "0.2.0",
+    // 调试配置数组，可以定义多个调试场景
+    "configurations": [
+        {
+            // 调试配置的名称，会在调试下拉菜单中显示
+            "name": "Hardhat: Run Script",
+            // 调试器类型，node 表示使用 Node.js 调试器
+            "type": "node",
+            // 请求类型，launch 表示启动新的调试会话
+            "request": "launch",
+            // 运行时参数，这里指定运行 npm run 命令
+            "runtimeArgs": [
+                "run"
+            ],
+            // 要调试的程序路径，指向 Hardhat 的可执行文件
+            "program": "${workspaceFolder}/node_modules/.bin/hardhat",
+            // 传递给程序的参数，${input:scriptName} 会提示用户输入脚本名称
+            "args": [
+                "run",
+                "${input:scriptName}"
+            ],
+            // 工作目录，设置为当前工作区根目录
+            "cwd": "${workspaceFolder}",
+            // 控制台类型，integratedTerminal 表示使用 VSCode 集成终端
+            "console": "integratedTerminal",
+            // 内部控制台选项，neverOpen 表示不打开内部调试控制台
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            // 调试配置名称：运行 Hardhat 测试
+            "name": "Hardhat: Test",
+            // 使用 Node.js 调试器
+            "type": "node",
+            // 启动新的调试会话
+            "request": "launch",
+            // 调试 Hardhat 测试命令
+            "program": "${workspaceFolder}/node_modules/.bin/hardhat",
+            // 传递 test 参数给 Hardhat
+            "args": [
+                "test"
+            ],
+            // 工作目录设置为工作区根目录
+            "cwd": "${workspaceFolder}",
+            // 使用集成终端显示输出
+            "console": "integratedTerminal",
+            // 跳过内部 Node.js 文件的调试，避免进入依赖库代码
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            // 调试配置名称：编译 Solidity 合约
+            "name": "Hardhat: Compile",
+            // 使用 Node.js 调试器
+            "type": "node",
+            // 启动新的调试会话
+            "request": "launch",
+            // 调试 Hardhat 编译命令
+            "program": "${workspaceFolder}/node_modules/.bin/hardhat",
+            // 传递 compile 参数给 Hardhat
+            "args": [
+                "compile"
+            ],
+            // 工作目录设置为工作区根目录
+            "cwd": "${workspaceFolder}",
+            // 使用集成终端显示编译输出
+            "console": "integratedTerminal"
+        }
+    ],
+    // 输入变量定义，用于在调试时动态获取用户输入
+    "inputs": [
+        {
+            // 输入变量的 ID，在 args 中通过 ${input:scriptName} 引用
+            "id": "scriptName",
+            // 输入类型，promptString 表示弹出字符串输入框
+            "type": "promptString",
+            // 输入框的提示文本，指导用户输入什么内容
+            "description": "Enter script name (e.g., scripts/deploy.js)"
+        }
+    ]
+}

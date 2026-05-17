@@ -1,0 +1,36 @@
+{
+  // Solidity 编译器配置：使用远程最新版本进行编译
+  "solidity.compileUsingRemoteVersion": "latest",
+  
+  // Solidity 代码检查工具（linter）配置，使用 solhint 进行代码规范检查
+  "solidity.linter": "solhint",
+  
+  // Solidity 文件的编辑器特定配置
+  "[solidity]": {
+    // 保存文件时自动格式化代码
+    "editor.formatOnSave": true,
+    // 指定 Solidity 文件的默认格式化工具为 JuanBlanco 的 Solidity 扩展
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  
+  // 文件关联配置：将 .sol 后缀的文件识别为 Solidity 语言
+  "files.associations": {
+    "*.sol": "solidity"
+  },
+  
+  // Solidity 路径重映射配置，用于处理导入路径（当前为空数组，表示不使用重映射）
+  "solidity.remappings": [],
+  
+  // Solidity 遥测配置，允许发送匿名使用数据以帮助改进扩展（可选）
+  "solidity.telemetry": true,
+  
+  // 编辑器快速建议配置
+  "editor.quickSuggestions": {
+    // 在其他位置启用快速建议
+    "other": "on",
+    // 在注释中禁用快速建议
+    "comments": "off",
+    // 在字符串中禁用快速建议
+    "strings": "off"
+  }
+}

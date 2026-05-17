@@ -1,0 +1,91 @@
+{
+    // VSCode 任务配置文件版本
+    "version": "2.0.0",
+    // 任务数组，定义多个可执行的任务
+    "tasks": [
+        {
+            // 任务的标签名称，在运行任务时会显示这个名称
+            "label": "Hardhat: Compile",
+            // 任务类型，shell 表示在 shell 中执行命令
+            "type": "shell",
+            // 要执行的命令，编译 Solidity 合约
+            "command": "npx hardhat compile",
+            // 任务分组配置
+            "group": {
+                // 组类型为 build（构建任务）
+                "kind": "build",
+                // 设置为默认构建任务，可以通过 Ctrl+Shift+B 快速运行
+                "isDefault": true
+            },
+            // 任务展示配置
+            "presentation": {
+                // 总是显示终端输出
+                "reveal": "always",
+                // 在新的终端面板中显示
+                "panel": "new"
+            },
+            // 问题匹配器，用于识别和显示编译错误（空数组表示不自动解析错误）
+            "problemMatcher": []
+        },
+        {
+            // 任务标签：运行 Hardhat 测试
+            "label": "Hardhat: Test",
+            // 任务类型：shell 命令
+            "type": "shell",
+            // 执行测试的命令
+            "command": "npx hardhat test",
+            // 任务分组配置
+            "group": {
+                // 组类型为 test（测试任务）
+                "kind": "test",
+                // 设置为默认测试任务
+                "isDefault": true
+            },
+            // 任务展示配置
+            "presentation": {
+                // 总是显示终端输出
+                "reveal": "always",
+                // 在新的终端面板中显示
+                "panel": "new"
+            },
+            // 问题匹配器（空数组表示不自动解析错误）
+            "problemMatcher": []
+        },
+        {
+            // 任务标签：清理 Hardhat 编译缓存
+            "label": "Hardhat: Clean",
+            // 任务类型：shell 命令
+            "type": "shell",
+            // 清理编译产物的命令
+            "command": "npx hardhat clean",
+            // 任务展示配置
+            "presentation": {
+                // 总是显示终端输出
+                "reveal": "always",
+                // 在新的终端面板中显示
+                "panel": "new"
+            },
+            // 问题匹配器
+            "problemMatcher": []
+        },
+        {
+            // 任务标签：启动 Hardhat 本地测试网络节点
+            "label": "Hardhat: Node",
+            // 任务类型：shell 命令
+            "type": "shell",
+            // 启动本地区块链节点的命令
+            "command": "npx hardhat node",
+            // 标记为后台任务，不会阻塞其他操作
+            "isBackground": true,
+            // 任务展示配置
+            "presentation": {
+                // 总是显示终端输出
+                "reveal": "always",
+                // 在新的终端面板中显示
+                "panel": "new"
+            },
+            // 问题匹配器
+            "problemMatcher": []
+        }
+    ]
+}
